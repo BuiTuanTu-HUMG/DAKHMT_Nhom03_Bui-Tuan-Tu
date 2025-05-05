@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ChatbotService {
-  static const String _geminiKey = 'AIzaSyAg6SXEvHCn8KjbhmJX1U_QVYHNDvtopzY';
+  static final String _geminiKey =  dotenv.env['Gemini_API_Key'] ?? '';
   static const String _geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent';
 
   static Future<String?> getChatResponse(String message) async {
