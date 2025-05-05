@@ -4,10 +4,12 @@ import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/chatbot_screen.dart';
 import 'service/health_data_store.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await HealthDataStore.init(); 
+  await dotenv.load(fileName: ".env");
   runApp(MyApp());
 }
 
