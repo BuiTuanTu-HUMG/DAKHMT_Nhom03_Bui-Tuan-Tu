@@ -11,6 +11,29 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   final List<Map<String, String>> _messages = [];
   bool _isLoading = false;
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final Object? args = ModalRoute.of(context)?.settings.arguments;
+    if (args != null && args is String && args.isNotEmpty) {
+      _handleInitialPrompt(args);
+    }
+  }
+
+  void _handleInitialPrompt(String prompt) async {
+    setState(() {
+      _messages.add({'sender': 'user', 'text': prompt});
+      _isLoading = true;
+    });
+
+    final response = await ChatbotService.getChatResponse(prompt);
+
+    setState(() {
+      _messages.add({'sender': 'bot', 'text': response ?? 'Không có phản hồi từ chatbot.'});
+      _isLoading = false;
+    });
+  }
+
   void _sendMessage() async {
     String input = _controller.text.trim();
     if (input.isNotEmpty) {

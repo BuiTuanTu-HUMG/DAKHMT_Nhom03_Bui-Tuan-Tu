@@ -1,94 +1,88 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'health_tracker_screen.dart';
 import 'history_screen.dart';
 import 'chatbot_screen.dart';
 import 'settings_screen.dart';
-import 'extended_tracker_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 0;
+  final List<Widget> _screens = [
+    HealthTrackerScreen(),
+    HistoryScreen(),
+    ChatbotScreen(),
+    SettingsScreen(),
+  ];
+
+  Future<void> _logout(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    Navigator.pushReplacementNamed(context, '/login');
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white.withOpacity(0.9),
-        elevation: 0,
-        title: const Text(
-          "Health Tracker",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.black),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      backgroundColor: Color(0xFFF8F9FA),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
           children: [
-            const SizedBox(height: kToolbarHeight + 10),
-            const Text(
-              "Chào mừng trở lại!",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              "Hãy chọn một chức năng để bắt đầu",
-              style: TextStyle(fontSize: 16, color: Colors.black54),
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                children: [
-                  _buildTile(context, 'Theo dõi sức khỏe', Icons.favorite, Colors.pinkAccent, HealthTrackerScreen()),
-                  _buildTile(context, 'Lịch sử', Icons.history, Colors.blueAccent, HistoryScreen()),
-                  _buildTile(context, 'Chatbot', Icons.chat, Colors.green, ChatbotScreen()),
-                  _buildTile(context, 'Cài đặt', Icons.settings, Colors.grey, SettingsScreen()),
-                  _buildTile(context, 'Sức khỏe mở rộng', Icons.monitor_heart, Colors.deepPurple, ExtendedTrackerScreen()),
-                ],
+            DrawerHeader(
+              decoration: BoxDecoration(color: Colors.lightBlueAccent),
+              child: Text(
+                'Menu Chức Năng',
+                style: TextStyle(color: Colors.white, fontSize: 20),
               ),
+            ),
+            ListTile(
+              leading: Icon(Icons.logout),
+              title: Text('Đăng xuất'),
+              onTap: () => _logout(context),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildTile(BuildContext ctx, String title, IconData icon, Color color, Widget page) {
-    return GestureDetector(
-      onTap: () => Navigator.push(ctx, MaterialPageRoute(builder: (_) => page)),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 8,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                radius: 30,
-                backgroundColor: color.withOpacity(0.1),
-                child: Icon(icon, color: color, size: 30),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-              ),
-            ],
-          ),
-        ),
+      appBar: AppBar(
+        title: Text("Health Tracker"),
+        backgroundColor: Colors.lightBlueAccent,
+        foregroundColor: Colors.black,
+        elevation: 1,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pushNamed(context, '/login'),
+            child: Text("Đăng nhập", style: TextStyle(color: Colors.white)),
+          )
+        ],
+      ),
+      body: AnimatedSwitcher(
+        duration: Duration(milliseconds: 300),
+        transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+        child: _screens[_selectedIndex],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Colors.lightBlue,
+        unselectedItemColor: Colors.grey,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Sức khỏe'),
+          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Lịch sử'),
+          BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chatbot'),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Cài đặt'),
+        ],
       ),
     );
   }
